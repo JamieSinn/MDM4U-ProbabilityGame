@@ -180,18 +180,18 @@ public class Main
         return false;
     }
 
+    //TODO: Make this work with negative y values, probably have to modify
     private static HashMap<Double, Double> getIntersectionPoints(double y)
     {
         HashMap<Double, Double> result = new HashMap<>();
         double poi = newtonsMethod(y);
-        double saveRadX = 0;
-        double radX = 0;
+        double radX;
         boolean first = true;
         double[] xVals = new double[2];
         for (double x = poi; x <= 360; x += 0.001)
         {
             radX = toRad(x);
-            if (almostEqual(sin(radX), y, 0.000008))
+            if (almostEqual(f(radX, y), y, 0.000008))
             {
                 if (almostEqual(poi, radX, 0.01) && !first) continue;
                 System.out.println(poi);
