@@ -13,21 +13,22 @@ public class Main
     private static final double M_PI = Math.PI;
     private static final boolean DEBUG = false;
     private static String appid = "U2JAQY-U7787X42QJ";
+    public static boolean TEST_RESULT = false;
 
 
     public static void main(String[] args) throws Exception
     {
-
+        CSVOutput csv = new CSVOutput();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         if (args.length == 0)
         {
-            System.out.println("Please enter the selected choice from -1 to 1: ");
+            System.out.println("Please enter the selected choice from -1 to 1, and not 0: ");
             double choice = Double.parseDouble(reader.readLine());
-            if (choice > 1 || choice < -1)
+            if (choice > 1 || choice < -1 || choice == 0)
                 throw new Exception("Error: Invalid Y value.");
             System.out.println("Please enter the chosen direction: ");
             Choice direction = Choice.valueOf(reader.readLine().toUpperCase());
-            getIntersectionPoints(choice);
+            HashMap<Double, Double> points = getIntersectionPoints(choice);
             double count = 0;
             boolean reverse = false;
             System.out.println("Please press enter to stop cursor on the sine curve.");
@@ -42,8 +43,35 @@ public class Main
                 else
                     count += 0.001;
             }
-            System.out.println(toRad(count));
+            System.out.println("Value: " + toRad(count));
+            System.out.println("Win: " + csv.writeToCSV(choice, direction, getResult(points, direction, toRad(count), choice), toRad(count)));
+
         }
+        else
+        {
+            CSVOutput csvTest = new CSVOutput("TESTING.csv");
+            double choice = Double.parseDouble(args[0]);
+            Choice direction = Choice.valueOf(args[1].toUpperCase());
+            double stopAt = Double.parseDouble(args[2]);
+            TEST_RESULT = csvTest.writeToCSV(choice,
+                    direction,
+                    getResult(getIntersectionPoints(choice), direction, toRad(stopAt), choice), toRad(stopAt));
+            if (DEBUG) System.out.println("Win: " + TEST_RESULT);
+        }
+
+    }
+
+    private static boolean getResult(HashMap<Double, Double> ranges, Choice choice, double result, double guess)
+    {
+        for (Double from : ranges.keySet())
+        {
+            double to = ranges.get(from);
+            if (from >= result && result <= to)
+                return sin(result) > guess && choice.equals(Choice.ABOVE);
+            else
+                return sin(result) < guess && choice.equals(Choice.BELOW);
+        }
+        return false;
 
     }
 
@@ -175,10 +203,6 @@ public class Main
         }
     }
 
-    private static boolean getResult()
-    {
-        return false;
-    }
 
     //TODO: Make this work with negative y values, probably have to modify
     private static HashMap<Double, Double> getIntersectionPoints(double y)
@@ -194,16 +218,16 @@ public class Main
             if (almostEqual(f(radX, y), y, 0.000008))
             {
                 if (almostEqual(poi, radX, 0.01) && !first) continue;
-                System.out.println(poi);
+                if (DEBUG) System.out.println(poi);
                 if (first)
                 {
-                    System.out.println("x1: " + radX);
+                    if (DEBUG) System.out.println("x1: " + radX);
                     xVals[0] = radX;
                     first = false;
                 }
                 else
                 {
-                    System.out.println("x2: " + radX);
+                    if (DEBUG) System.out.println("x2: " + radX);
                     xVals[1] = radX;
                 }
             }
