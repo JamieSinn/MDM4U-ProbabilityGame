@@ -31,20 +31,31 @@ public class Main
             HashMap<Double, Double> points = getIntersectionPoints(choice);
             double count = 0;
             boolean reverse = false;
+            boolean firstloop = true;
+            int iterations = 1;
             System.out.println("Please press enter to stop cursor on the sine curve.");
             while (System.in.available() == 0)
             {
-                if (count >= 360)
+                if (count >= 350)
+                {
                     reverse = true;
+                    iterations++;
+                }
                 if (count <= 0)
                     reverse = false;
                 if (reverse)
-                    count -= 0.001;
+                    count -= 0.01;
                 else
-                    count += 0.001;
+                    count += 0.01;
+
+                if(iterations == 1)
+                    System.out.println(sin(toRad(count)));
             }
-            System.out.println("Value: " + toRad(count));
+            System.out.println("Value: " + sin(toRad(count)));
             System.out.println("Win: " + csv.writeToCSV(choice, direction, getResult(points, direction, toRad(count), choice), toRad(count)));
+            if(DEBUG) System.out.println("Needed to be within: " + getIntersectionPoints(choice).toString());
+            if(DEBUG) System.out.println("Value is: " + sin(toRad(count)) + " which is: " + (direction == Choice.ABOVE && sin(toRad(count)) >= choice ? "above" : "below" ) + " your guess." );
+
 
         }
         else
@@ -53,10 +64,12 @@ public class Main
             double choice = Double.parseDouble(args[0]);
             Choice direction = Choice.valueOf(args[1].toUpperCase());
             double stopAt = Double.parseDouble(args[2]);
+
             TEST_RESULT = csvTest.writeToCSV(choice,
                     direction,
                     getResult(getIntersectionPoints(choice), direction, toRad(stopAt), choice), toRad(stopAt));
             if (DEBUG) System.out.println("Win: " + TEST_RESULT);
+
         }
 
     }
@@ -66,10 +79,11 @@ public class Main
         for (Double from : ranges.keySet())
         {
             double to = ranges.get(from);
-            if (from >= result && result <= to)
-                return sin(result) > guess && choice.equals(Choice.ABOVE);
-            else
-                return sin(result) < guess && choice.equals(Choice.BELOW);
+            if (result >= from && result <= to)
+                if(choice.equals(Choice.BELOW))
+                    return sin(toRad(result)) >= guess;
+                else if(choice.equals(Choice.ABOVE))
+                    return sin(toRad(result)) <= guess;
         }
         return false;
 
