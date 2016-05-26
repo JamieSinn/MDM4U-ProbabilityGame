@@ -1,7 +1,5 @@
 package ca.jamiesinn.probabilityproject;
 
-import com.wolfram.alpha.*;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -97,90 +95,6 @@ public class Main
     public static double toDeg(double rad)
     {
         return (rad * 180 / M_PI);
-    }
-
-
-    private static double getCurveLength(double start, double end)
-    {
-        double result = 0;
-        String squery = "int sqrt(1+(cos(x))^2) from x=" + toRad(start) + " to x=" + toRad(end);
-        WAEngine engine = new WAEngine();
-        engine.setAppID(appid);
-        engine.addFormat("plaintext");
-
-        WAQuery query = engine.createQuery();
-        query.setInput(squery);
-
-        try
-        {
-            if (DEBUG)
-            {
-                // For educational purposes, print out the URL we are about to send:
-                System.out.println("Query URL:");
-                System.out.println(engine.toURL(query));
-                System.out.println("");
-
-            }
-            // This sends the URL to the Wolfram|Alpha server, gets the XML result
-            // and parses it into an object hierarchy held by the WAQueryResult object.
-            WAQueryResult queryResult = engine.performQuery(query);
-
-            if (queryResult.isError())
-            {
-                System.out.println("Query error");
-                System.out.println("  error code: " + queryResult.getErrorCode());
-                System.out.println("  error message: " + queryResult.getErrorMessage());
-            }
-            else if (!queryResult.isSuccess())
-            {
-                System.out.println("Query was not understood; no results available.");
-            }
-            else
-            {
-                // Got a result.
-                if (DEBUG)
-                    System.out.println("Successful query. Pods follow:\n");
-                for (WAPod pod : queryResult.getPods())
-                    if (!pod.isError())
-                    {
-                        if (!pod.getTitle().equals("Definite integral")) continue;
-                        if (DEBUG)
-                        {
-                            System.out.println(pod.getTitle());
-                            System.out.println("------------");
-                        }
-                        for (WASubpod subpod : pod.getSubpods())
-                            for (Object element : subpod.getContents())
-                                if (element instanceof WAPlainText)
-                                {
-                                    String resultS = ((WAPlainText) element).getText();
-                                    String finalNum = "";
-                                    boolean resultStart = false;
-                                    for (int i = 0; i < resultS.length(); i++)
-                                    {
-                                        //System.out.println(resultS.charAt(i));
-                                        if (resultStart)
-                                        {
-                                            finalNum += Character.toString(resultS.charAt(i));
-                                        }
-                                        if (String.valueOf(resultS.charAt(i)).equals("\uF7D9"))
-                                        {
-                                            resultStart = true;
-                                        }
-                                    }
-
-                                    result = Double.parseDouble(finalNum);
-                                }
-                    }
-                // We ignored many other types of Wolfram|Alpha output, such as warnings, assumptions, etc.
-                // These can be obtained by methods of WAQueryResult or objects deeper in the hierarchy.
-            }
-        }
-        catch (WAException e)
-        {
-            e.printStackTrace();
-        }
-        return result;
     }
 
     /**
